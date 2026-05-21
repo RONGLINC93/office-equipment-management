@@ -1,0 +1,57 @@
+[
+  {
+    "id": "1",
+    "username": "admin",
+    "fullName": "系统管理员",
+    "email": "admin@example.com",
+    "phone": "13800138000",
+    "department": "技术部",
+    "role": "admin",
+    "status": "active",
+    "password": "admin123"
+  },
+  {
+    "id": "2",
+    "username": "manager",
+    "fullName": "设备管理员",
+    "email": "manager@example.com",
+    "phone": "13800138001",
+    "department": "运维部",
+    "role": "manager",
+    "status": "active",
+    "password": "manager123"
+  },
+  {
+    "id": "4",
+    "username": "user1",
+    "fullName": "张三",
+    "email": "zhangsan@example.com",
+    "phone": "13800138002",
+    "department": "市场部",
+    "role": "user",
+    "status": "active",
+    "password": "user123"
+  },
+  {
+    "id": "5",
+    "username": "user2",
+    "fullName": "李四",
+    "email": "lisi@example.com",
+    "phone": "13800138003",
+    "department": "财务部",
+    "role": "user",
+    "status": "active",
+    "password": "user123"
+  },
+  {
+    "id": "6",
+    "username": "user3",
+    "fullName": "王五",
+    "email": "wangwu@example.com",
+    "phone": "13800138004",
+    "department": "人事部",
+    "role": "user",
+    "status": "inactive",
+    "password": "user123"
+  }
+]

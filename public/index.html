@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>办公设备管理系统</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // 在页面渲染前检查登录状态
+    (function () {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="app-container">
+    <header class="top-header">
+      <div class="header-left">
+        <button id="sidebarToggle" class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+        <h1>办公设备管理系统</h1>
+      </div>
+      <div class="header-right">
+        <span class="notification"><i class="fas fa-bell"></i></span>
+        <span class="user-info" id="btnProfile"><i class="fas fa-user"></i><span class="profile-text">
+            个人中心</span></span>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <aside id="sidebar" class="sidebar">
+        <nav class="sidebar-nav">
+          <div class="nav-item nav-parent active">
+            <div class="nav-header">
+              <span class="nav-icon"><i class="fas fa-desktop"></i></span>
+              <span class="nav-text">设备管理</span>
+              <span class="nav-arrow">›</span>
+            </div>
+            <div class="nav-children">
+              <div id="treeView" class="tree-view">
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+            <span class="nav-text">统计报表</span>
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon"><i class="fas fa-users"></i></span>
+            <span class="nav-text">用户管理</span>
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon"><i class="fas fa-cog"></i></span>
+            <span class="nav-text">系统设置</span>
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon"><i class="fas fa-info-circle"></i></span>
+            <span class="nav-text">关于系统</span>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <!-- 标签栏 -->
+        <div class="tab-bar">
+          <div class="tab-item active cannot-close" data-view="deviceManagement" draggable="true">
+            <i class="fas fa-desktop"></i>
+            <span>设备管理</span>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <input type="text" id="searchInput" class="search-input" placeholder="搜索设备名称、地址、楼宇...">
+          <div class="toolbar-buttons">
+            <button id="btnSearch" class="btn">搜索</button>
+            <button id="btnClear" class="btn">清空</button>
+            <button id="btnAdd" class="btn btn-primary">+ 添加设备</button>
+          </div>
+
+        </div>
+        <div class="nav-row">
+          <button id="btnBack" class="btn btn-secondary" style="display: none;">返回</button>
+          <div class="breadcrumb" id="breadcrumb">
+            <span class="breadcrumb-item active">首页</span>
+          </div>
+        </div>
+
+        <div class="view-container">
+          <div id="listView" class="list-view">
+          </div>
+
+          <div id="tableView" class="table-container" style="display: none;">
+            <table id="deviceTable">
+              <thead>
+                <tr>
+                  <th>座位行</th>
+                  <th>座位列</th>
+                  <th>设备类型</th>
+                  <th>设备名称</th>
+                  <th>设备配置</th>
+                  <th>备注</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="deviceTableBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div id="cardView" class="card-view" style="display: none;">
+          </div>
+
+          <!-- 搜索结果界面 -->
+          <div id="searchView" class="search-view" style="display: none;">
+            <div class="search-container">
+              <div class="search-header">
+                <h2><i class="fas fa-search"></i> 搜索结果</h2>
+                <div class="search-input-wrapper">
+                  <input type="text" id="searchKeyword" class="search-input" placeholder="输入设备名称、地址、楼宇等关键词...">
+                  <button id="btnSearchKeyword" class="btn btn-primary">搜索</button>
+                  <button id="btnClearSearch" class="btn btn-secondary">清空</button>
+                </div>
+              </div>
+              <div class="search-stats">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="searchSelectAll" onchange="toggleSearchSelectAll()">
+                  <span>全选</span>
+                </label>
+                <span>-</span>
+                <span>关键字：<span id="currentSearchKeyword" class="search-keyword"></span></span>
+                <span>-</span>
+                <span id="searchResultCount">0</span> 条结果
+                <button id="btnBatchDeleteSearch" class="btn btn-danger btn-sm" style="display:none;margin-left:auto;"
+                  onclick="batchDeleteSearchDevices()">
+                  <i class="fas fa-trash-alt"></i> 批量删除
+                </button>
+              </div>
+              <div class="search-results">
+                <div class="table-container">
+                  <table id="searchResultTable">
+                    <thead>
+                      <tr>
+                        <th>选择</th>
+                        <th>地址</th>
+                        <th>楼宇</th>
+                        <th>房号</th>
+                        <th>设备类型</th>
+                        <th>设备名称</th>
+                        <th>配置</th>
+                        <th>更新时间</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="searchResultTableBody">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 系统设置界面 -->
+          <div id="settingsView" class="settings-view" style="display: none;">
+            <div class="settings-container">
+              <div class="settings-header">
+                <h2><i class="fas fa-chart-line"></i> 系统设置</h2>
+                <div class="settings-filter">
+
+                </div>
+              </div>
+              <div class="settings-content">
+                <div class="settings-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-tags"></i> 设备类型</h3>
+                  </div>
+                  <div class="section-body">
+                    <div class="setting-item">
+                      <div class="setting-label">添加新类型</div>
+                      <div class="setting-control">
+                        <input type="text" id="newDeviceType" class="form-input" placeholder="输入设备类型名称">
+                        <button id="btnAddDeviceType" class="btn btn-primary"><i class="fas fa-plus"></i> 添加</button>
+                      </div>
+                    </div>
+                    <div class="setting-item block">
+                      <div class="setting-row">
+                        <div class="setting-label no-margin">已定义的设备类型：</div>
+                        <div class="setting-hint">
+                          <i class="fas fa-arrows-alt"></i> 拖拽图标可调整顺序
+                        </div>
+                      </div>
+                      <div id="deviceTypeList" class="setting-list">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 数据备份区域 -->
+                <div class="settings-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-database"></i> 数据备份</h3>
+                    <button id="btnCreateBackup" class="btn btn-primary btn-sm">
+                      <i class="fas fa-plus"></i> 立即备份
+                    </button>
+                  </div>
+                  <div class="section-body">
+                    <div class="setting-item block">
+                      <div class="setting-row">
+                        <div class="setting-label no-margin">备份文件列表：</div>
+                        <div class="setting-hint">
+                          <i class="fas fa-info-circle"></i> 系统每天凌晨 2:00 自动备份
+                        </div>
+                      </div>
+                      <div id="backupList" class="setting-list backup-list">
+                        <div class="empty-state">
+                          <i class="fas fa-folder-open"></i>
+                          <p>暂无备份文件</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 个人中心界面 -->
+          <div id="profileView" class="profile-view" style="display: none;">
+            <div class="profile-container">
+              <div class="profile-header">
+                <div class="profile-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="profile-info">
+                  <h2 id="profileName">管理员</h2>
+                  <p id="profileRole">系统管理员</p>
+                </div>
+                <button id="btnLogout" class="btn btn-danger btn-logout"><i class="fas fa-sign-out-alt"></i>
+                  退出登录</button>
+              </div>
+
+              <div class="profile-content">
+                <div class="profile-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-user"></i> 个人信息</h3>
+                  </div>
+                  <div class="section-body">
+                    <div class="profile-form">
+                      <div class="form-group">
+                        <label class="form-label">用户名</label>
+                        <input type="text" id="profileUsername" class="form-input" value="crl" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">姓名</label>
+                        <input type="text" id="profileFullName" class="form-input" value="管理员">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">邮箱</label>
+                        <input type="email" id="profileEmail" class="form-input" value="455801692@qq.com">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">手机号</label>
+                        <input type="tel" id="profilePhone" class="form-input" value="15876377692">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">部门</label>
+                        <input type="text" id="profileDepartment" class="form-input" value="技术部">
+                      </div>
+                      <div class="form-actions">
+                        <button id="btnUpdateProfile" class="btn btn-primary"><i class="fas fa-save"></i> 保存修改</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="profile-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-lock"></i> 修改密码</h3>
+                  </div>
+                  <div class="section-body">
+                    <div class="profile-form">
+                      <div class="form-group">
+                        <label class="form-label">当前密码</label>
+                        <input type="password" id="currentPassword" class="form-input" placeholder="请输入当前密码">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">新密码</label>
+                        <input type="password" id="newPassword" class="form-input" placeholder="请输入新密码">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">确认新密码</label>
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="请再次输入新密码">
+                      </div>
+                      <div class="form-actions">
+                        <button id="btnChangePassword" class="btn btn-primary"><i class="fas fa-key"></i> 修改密码</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="profile-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-history"></i> 操作日志</h3>
+                  </div>
+                  <div class="section-body">
+                    <div class="profile-logs">
+                      <div class="log-item">
+                        <span class="log-time">2024-01-15 10:30:25</span>
+                        <span class="log-action">登录系统</span>
+                      </div>
+                      <div class="log-item">
+                        <span class="log-time">2024-01-15 09:15:42</span>
+                        <span class="log-action">添加设备 - 联想 ThinkCentre</span>
+                      </div>
+                      <div class="log-item">
+                        <span class="log-time">2024-01-14 16:45:18</span>
+                        <span class="log-action">编辑设备 - HP LaserJet</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 统计报表界面 -->
+          <div id="reportsView" class="reports-view" style="display: none;">
+            <div class="reports-container">
+              <div class="reports-header">
+                <h2><i class="fas fa-chart-line"></i> 统计报表</h2>
+                <div class="reports-filter">
+                  <select id="reportAddressFilter" class="form-select">
+                    <option value="">全部地址</option>
+                  </select>
+                  <select id="reportBuildingFilter" class="form-select">
+                    <option value="">全部楼宇</option>
+                  </select>
+                  <button id="btnRefreshReport" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-sync-alt"></i> 刷新
+                  </button>
+                </div>
+              </div>
+
+              <!-- 统计卡片 -->
+              <div class="stats-cards">
+                <div class="stat-card">
+                  <div class="stat-icon bg-primary">
+                    <i class="fas fa-desktop"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="totalDevices">0</div>
+                    <div class="stat-label">设备总数</div>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon bg-success">
+                    <i class="fas fa-cubes"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="totalTypes">0</div>
+                    <div class="stat-label">设备类型</div>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon bg-warning">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="totalLocations">0</div>
+                    <div class="stat-label">位置数量</div>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon bg-danger">
+                    <i class="fas fa-building"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="totalBuildings">0</div>
+                    <div class="stat-label">楼宇数量</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 图表和表格区域 -->
+              <div class="reports-grid">
+                <!-- 设备类型分布 -->
+                <div class="report-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-pie-chart"></i> 设备类型分布</h3>
+                  </div>
+                  <div class="section-body">
+                    <div id="typeDistribution" class="chart-container">
+                      <div class="pie-chart">
+                        <svg viewBox="0 0 200 200">
+                          <circle cx="100" cy="100" r="80" fill="none" stroke="#e2e8f0" stroke-width="20" />
+                          <circle cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="20"
+                            stroke-dasharray="" stroke-dashoffset="0" class="pie-slice" />
+                        </svg>
+                        <div class="pie-center">
+                          <div class="pie-total" id="pieTotal">0</div>
+                          <div class="pie-label">设备总数</div>
+                        </div>
+                      </div>
+                      <div class="chart-legend" id="typeLegend">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 地址分布 -->
+                <div class="report-section">
+                  <div class="section-header">
+                    <h3><i class="fas fa-chart-bar"></i> 地址分布统计</h3>
+                  </div>
+                  <div class="section-body">
+                    <div class="bar-chart-container">
+                      <div id="addressChart" class="bar-chart">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 详细统计表格 -->
+                <div class="report-section full-width">
+                  <div class="section-header">
+                    <h3><i class="fas fa-table"></i> 设备详细统计</h3>
+                  </div>
+                  <div class="section-body">
+                    <div class="table-container">
+                      <table id="reportTable">
+                        <thead>
+                          <tr>
+                            <th>地址</th>
+                            <th>楼宇</th>
+                            <th>房号</th>
+                            <th>设备类型</th>
+                            <th>设备名称</th>
+                            <th>配置</th>
+                            <th>备注</th>
+                            <th>更新时间</th>
+                          </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 用户管理界面 -->
+          <div id="usersView" class="users-view" style="display: none;">
+            <div class="users-container">
+              <div class="users-header">
+                <h2><i class="fas fa-users"></i> 用户管理</h2>
+                <div class="users-actions">
+                  <div class="search-input-wrapper">
+                    <input type="text" id="userSearchInput" class="search-input" placeholder="搜索用户名、姓名...">
+                    <button id="btnUserSearch" class="btn btn-primary btn-sm">搜索</button>
+                  </div>
+                  <button id="btnAddUser" class="btn btn-success">
+                    <i class="fas fa-user-plus"></i> 添加用户
+                  </button>
+                </div>
+              </div>
+
+              <!-- 统计卡片 -->
+              <div class="users-stats">
+                <div class="stat-card">
+                  <div class="stat-icon bg-primary">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">用户总数</div>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon bg-success">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="activeUsers">0</div>
+                    <div class="stat-label">活跃用户</div>
+                  </div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon bg-warning">
+                    <i class="fas fa-user-lock"></i>
+                  </div>
+                  <div class="stat-info">
+                    <div class="stat-value" id="inactiveUsers">0</div>
+                    <div class="stat-label">非活跃用户</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 用户列表 -->
+              <div class="users-content">
+                <div class="table-container">
+                  <table id="userTable">
+                    <thead>
+                      <tr>
+                        <th>用户名</th>
+                        <th>姓名</th>
+                        <th>邮箱</th>
+                        <th>电话</th>
+                        <th>部门</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 添加/编辑用户弹窗 -->
+          <div id="userModal" class="modal">
+            <div class="modal-content modal-lg">
+              <div class="modal-header">
+                <h2 id="userModalTitle">
+                  <span class="modal-icon"><i class="fas fa-user-plus"></i></span>
+                  <span id="userModalTitleText">添加用户</span>
+                </h2>
+                <span class="close" title="关闭" onclick="closeUserModal()">&times;</span>
+              </div>
+              <div class="modal-body-wrapper">
+                <form id="userForm">
+                  <input type="hidden" id="userId">
+
+                  <div class="form-section">
+                    <div class="section-title"><i class="fas fa-user"></i> 基本信息</div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="username">用户名 <span class="required">*</span></label>
+                        <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="fullName">姓名 <span class="required">*</span></label>
+                        <input type="text" id="fullName" name="fullName" placeholder="请输入姓名" required>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="email">邮箱</label>
+                        <input type="email" id="email" name="email" placeholder="请输入邮箱">
+                      </div>
+                      <div class="form-group">
+                        <label for="phone">电话</label>
+                        <input type="tel" id="phone" name="phone" placeholder="请输入电话">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section">
+                    <div class="section-title"><i class="fas fa-cog"></i> 权限设置</div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="department">部门</label>
+                        <input type="text" id="department" name="department" placeholder="请输入部门">
+                      </div>
+                      <div class="form-group">
+                        <label for="role">角色</label>
+                        <select id="role" name="role">
+                          <option value="user">普通用户</option>
+                          <option value="manager">设备管理员</option>
+                          <option value="admin">系统管理员</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="status">状态</label>
+                        <select id="status" name="status">
+                          <option value="active">活跃</option>
+                          <option value="inactive">非活跃</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" name="password" placeholder="不填则保持不变">
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUserModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">保存</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 关于系统界面 -->
+          <div id="aboutView" class="about-view" style="display: none;">
+            <div class="about-container">
+              <div class="about-header">
+                <div class="about-logo">
+                  <i class="fas fa-desktop"></i>
+                </div>
+                <h2>办公设备管理系统</h2>
+                <p class="about-version">版本 1.0.0</p>
+              </div>
+              <div class="about-content">
+                <div class="about-section">
+                  <div class="section-title"><i class="fas fa-sync-alt"></i> 系统更新</div>
+                  <div class="update-container">
+                    <button id="btnManualUpdate" class="btn btn-primary">
+                      <i class="fas fa-upload"></i> 手动更新
+                    </button>
+                  </div>
+                </div>
+                <div class="about-section">
+                  <div class="section-title"><i class="fas fa-file-alt"></i> 系统简介</div>
+                  <p class="about-text">办公设备管理系统是一款用于管理企业办公设备的软件，支持设备的添加、编辑、删除、查询等基本操作，帮助企业实现设备的规范化管理。</p>
+                </div>
+                <div class="about-section">
+                  <div class="section-title"><i class="fas fa-cog"></i> 功能特点</div>
+                  <ul class="about-features">
+                    <li><i class="fas fa-check"></i> 设备分类管理</li>
+                    <li><i class="fas fa-check"></i> 设备信息维护</li>
+                    <li><i class="fas fa-check"></i> 位置导航功能</li>
+                    <li><i class="fas fa-check"></i> 多视图展示（列表/卡片/表格）</li>
+                    <li><i class="fas fa-check"></i> 搜索筛选功能</li>
+                  </ul>
+                </div>
+                <div class="about-section">
+                  <div class="section-title"><i class="fas fa-code"></i> 技术栈</div>
+                  <div class="tech-tags">
+                    <span class="tech-tag">HTML5</span>
+                    <span class="tech-tag">CSS3</span>
+                    <span class="tech-tag">JavaScript</span>
+                    <span class="tech-tag">Font Awesome</span>
+                  </div>
+                </div>
+                <div class="about-section">
+                  <div class="section-title"><i class="fas fa-calendar"></i> 开发信息</div>
+                  <p class="about-text">© 2026 <a href="https://github.com/RONGLINC93" target="_blank"
+                      rel="noopener noreferrer">RONGLINC93</a> 办公设备管理系统. 保留所有权利.</p>
+                  <p class="license">
+                    <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT
+                      License</a>
+                  </p>
+                  <p class="license-info">本项目采用 MIT 开源许可证，允许自由使用、复制、修改和分发。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <div id="deviceContextMenu" class="context-menu">
+    <div class="context-menu-item" data-action="edit">
+      <i class="fas fa-edit"></i> 编辑
+    </div>
+    <div class="context-menu-item" data-action="copy">
+      <i class="fas fa-copy"></i> 复制
+    </div>
+    <div class="context-menu-item" data-action="move">
+      <i class="fas fa-exchange-alt"></i> 移动
+    </div>
+    <div class="context-menu-item" data-action="delete">
+      <i class="fas fa-trash"></i> 删除
+    </div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" data-action="properties">
+      <i class="fas fa-info-circle"></i> 属性（详情）
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal">
+    <div class="modal-content modal-sm confirm-modal">
+      <div class="modal-header">
+        <div class="confirm-title">
+          <i class="fas fa-exclamation-circle"></i>
+          <h2>确认操作</h2>
+        </div>
+        <span class="close confirm-close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage" class="confirm-text">确定要删除此设备吗？</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnConfirmCancel" class="btn btn-secondary">取消</button>
+        <button type="button" id="btnConfirmOk" class="btn btn-danger">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 还原备份模态框 -->
+  <div id="restoreModal" class="modal">
+    <div class="modal-content modal-md">
+      <div class="modal-header">
+        <h2><i class="fas fa-upload"></i> 还原备份</h2>
+        <span class="close restore-modal-close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>请选择还原方式：</p>
+        <div class="restore-options">
+          <label class="restore-option">
+            <input type="radio" name="restoreMode" value="overwrite" checked>
+            <div class="option-content">
+              <div class="option-title"><i class="fas fa-eraser"></i> 还原覆盖</div>
+              <div class="option-desc">用备份数据完全覆盖当前数据，所有现有数据将丢失</div>
+            </div>
+          </label>
+          <label class="restore-option">
+            <input type="radio" name="restoreMode" value="merge">
+            <div class="option-content">
+              <div class="option-title"><i class="fas fa-layer-group"></i> 还原合并</div>
+              <div class="option-desc">将备份数据与当前数据合并，重复ID的数据将被保留</div>
+            </div>
+          </label>
+        </div>
+        <div id="restoreFilename" class="restore-filename">
+          <i class="fas fa-file-archive"></i>
+          <span></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnRestoreCancel" class="btn btn-secondary">取消</button>
+        <button type="button" id="btnRestoreOk" class="btn btn-success">确认还原</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="updateModal" class="modal">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h2><i class="fas fa-sync-alt"></i> 手动更新</h2>
+        <span class="close update-modal-close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="update-info">
+          <div class="update-info-title"><i class="fas fa-info-circle"></i> 更新说明</div>
+          <ul class="update-info-list">
+            <li>请选择 ZIP 格式的更新包文件</li>
+            <li>更新过程将替换系统文件，请提前备份重要数据</li>
+            <li>数据文件不会丢失，合并更新包中的数据到当前系统数据文件</li>
+            <li>更新完成后服务器将自动重启</li>
+          </ul>
+        </div>
+        <div class="update-upload-section">
+          <label class="file-upload-label">
+            <input type="file" id="updateFile" accept=".zip" class="file-upload-input">
+            <span class="btn btn-secondary btn-block">
+              <i class="fas fa-folder-open"></i> 选择ZIP更新包
+            </span>
+          </label>
+          <p id="updateFileName" class="update-file-name"></p>
+        </div>
+        <p id="updateStatus" class="update-status" style="display: none;"></p>
+        <div id="uploadProgress" class="upload-progress" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <span class="progress-text">0%</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnUpdateCancel" class="btn btn-secondary">取消</button>
+        <button type="button" id="btnUploadUpdate" class="btn btn-primary" disabled>
+          <i class="fas fa-upload"></i> 上传并更新
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h2 id="modalTitle">
+          <span class="modal-icon"><i class="fas fa-file-edit"></i></span>
+          <span id="modalTitleText">添加设备</span>
+        </h2>
+        <span class="close" title="关闭">&times;</span>
+      </div>
+      <div class="modal-body-wrapper">
+        <form id="deviceForm">
+          <input type="hidden" id="deviceId">
+
+          <div class="form-section">
+            <div class="section-title"><i class="fas fa-map-marker-alt"></i> 位置信息</div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="address">地址 <span class="required">*</span></label>
+                <input type="text" id="address" name="address" placeholder="请输入地址" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="building">楼宇 <span class="required">*</span></label>
+                <input type="text" id="building" name="building" placeholder="请输入楼宇" required>
+              </div>
+
+              <div class="form-group">
+                <label for="roomNumber">房号 <span class="required">*</span></label>
+                <input type="text" id="roomNumber" name="roomNumber" placeholder="请输入房号" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="seatRow">座位行</label>
+                <input type="number" id="seatRow" name="seatRow" placeholder="如：1" min="1">
+              </div>
+
+              <div class="form-group">
+                <label for="seatColumn">座位列</label>
+                <input type="number" id="seatColumn" name="seatColumn" placeholder="如：1" min="1">
+              </div>
+            </div>
+
+            <div id="seatPreview" class="seat-preview" style="display: none;">
+              <div class="seat-preview-header"><i class="fas fa-th"></i> 座位布局预览</div>
+              <div class="seat-preview-dropdown">
+                <select id="seatLayout" class="form-select small" onchange="onSeatLayoutChange(this)">
+                  <option value="1x1">1×1</option>
+                  <option value="1x2">1×2</option>
+                  <option value="1x3">1×3</option>
+                  <option value="1x4">1×4</option>
+                  <option value="1x5">1×5</option>
+                  <option value="2x1">2×1</option>
+                  <option value="2x2">2×2</option>
+                  <option value="2x3">2×3</option>
+                  <option value="2x4">2×4</option>
+                  <option value="2x5">2×5</option>
+                  <option value="3x1">3×1</option>
+                  <option value="3x2" selected>3×2</option>
+                  <option value="3x3">3×3</option>
+                  <option value="3x4">3×4</option>
+                  <option value="3x5">3×5</option>
+                  <option value="4x1">4×1</option>
+                  <option value="4x2">4×2</option>
+                  <option value="4x3">4×3</option>
+                  <option value="4x4">4×4</option>
+                  <option value="4x5">4×5</option>
+                  <option value="5x1">5×1</option>
+                  <option value="5x2">5×2</option>
+                  <option value="5x3">5×3</option>
+                  <option value="5x4">5×4</option>
+                  <option value="5x5">5×5</option>
+                </select>
+              </div>
+              <div id="seatPreviewGrid" class="seat-preview-grid"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title"><i class="fas fa-desktop"></i> 设备信息</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="deviceType">设备类型 <span class="required">*</span></label>
+                <select id="deviceType" name="deviceType" required>
+                  <option value="">请选择类型</option>
+                  <option value="电脑"><i class="fas fa-laptop"></i> 电脑</option>
+                  <option value="打印机"><i class="fas fa-print"></i> 打印机</option>
+                  <option value="复印机"><i class="fas fa-copy"></i> 复印机</option>
+                  <option value="扫描仪"><i class="fas fa-scanner"></i> 扫描仪</option>
+                  <option value="传真机"><i class="fas fa-fax"></i> 传真机</option>
+                  <option value="投影仪"><i class="fas fa-video"></i> 投影仪</option>
+                  <option value="电话"><i class="fas fa-phone"></i> 电话</option>
+                  <option value="碎纸机"><i class="fas fa-trash-alt"></i> 碎纸机</option>
+                  <option value="装订机"><i class="fas fa-book"></i> 装订机</option>
+                  <option value="考勤机"><i class="fas fa-clock"></i> 考勤机</option>
+                  <option value="显示屏"><i class="fas fa-tv"></i> 显示屏</option>
+                  <option value="网络设备"><i class="fas fa-network-wired"></i> 网络设备</option>
+                  <option value="其他"><i class="fas fa-box"></i> 其他</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="deviceName">设备名称 <span class="required">*</span></label>
+                <input type="text" id="deviceName" name="deviceName" placeholder="如：联想 ThinkCentre" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="deviceConfig">设备配置</label>
+                <input type="text" id="deviceConfig" name="deviceConfig" placeholder="如：i5-12400/16GB/512GB SSD">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-title"><i class="fas fa-file-text"></i> 备注信息</div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="remark">备注</label>
+                <textarea id="remark" name="remark" rows="3" placeholder="其他需要说明的信息..."></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group full-width">
+                <label for="deviceImage">设备图片（选填）</label>
+                <div class="image-upload-container">
+                  <input type="file" id="deviceImage" name="deviceImage" accept="image/*" multiple
+                    class="file-input-hidden">
+                  <div class="image-upload-btn" onclick="document.getElementById('deviceImage').click()">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照/上传图片</span>
+                  </div>
+                  <div id="imagePreview" class="image-preview"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCancel" class="btn btn-secondary">取消</button>
+        <button type="submit" id="btnSave" form="deviceForm" class="btn btn-primary">
+          <span class="btn-icon"><i class="fas fa-check"></i></span>
+          <span id="btnSaveText">保存</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

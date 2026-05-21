@@ -1,0 +1,66 @@
+[
+  {
+    "type": "打印机",
+    "icon": "fa-print"
+  },
+  {
+    "type": "电脑",
+    "icon": "fa-laptop"
+  },
+  {
+    "type": "复印机",
+    "icon": "fa-copy"
+  },
+  {
+    "type": "笔记本",
+    "icon": "fa-box"
+  },
+  {
+    "type": "显示屏",
+    "icon": "fa-tv"
+  },
+  {
+    "type": "扫描仪",
+    "icon": "fa-scanner"
+  },
+  {
+    "type": "网络设备",
+    "icon": "fa-network-wired"
+  },
+  {
+    "type": "投影仪",
+    "icon": "fa-video"
+  },
+  {
+    "type": "碎纸机",
+    "icon": "fa-trash-alt"
+  },
+  {
+    "type": "考勤机",
+    "icon": "fa-clock"
+  },
+  {
+    "type": "电话",
+    "icon": "fa-phone"
+  },
+  {
+    "type": "装订机",
+    "icon": "fa-book"
+  },
+  {
+    "type": "电视机",
+    "icon": "fa-box"
+  },
+  {
+    "type": "机顶盒",
+    "icon": "fa-box"
+  },
+  {
+    "type": "传真机",
+    "icon": "fa-fax"
+  },
+  {
+    "type": "其它",
+    "icon": "fa-box"
+  }
+]

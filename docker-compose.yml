@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  ems:
+    image: node:25-alpine
+    container_name: ems
+    restart: unless-stopped
+    ports:
+      - "9525:9525"
+    volumes:
+      - "/vol2/1000/web/EMS‌:/app"
+    working_dir: "/app"
+    command: "node server.js"
+    environment:
+      - NODE_ENV=production
