@@ -20,6 +20,12 @@ function createZipPackage(outputPath) {
         console.log('跳过:', file);
         continue;
       }
+
+      // 排除 .env 文件
+      if (file === '.env') {
+        console.log('跳过:', file);
+        continue;
+      }
       
       if (stat.isDirectory()) {
         walkDirectory(filePath);
