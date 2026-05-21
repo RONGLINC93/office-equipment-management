@@ -1,7 +1,5 @@
-
 .DS_Store
 .env
 *.log
 backup/
 uploads/
-package.js
