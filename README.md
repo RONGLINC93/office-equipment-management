@@ -10,6 +10,32 @@
 - **文件上传** - 支持设备图片上传
 - **用户管理** - 简单的用户认证系统
 
+## 🖼️ 项目截图
+
+### 登录页面
+
+![登录页面](screenshots/login.png)
+
+### 设备管理首页
+
+![设备管理首页](screenshots/dashboard.png)
+
+### 房间设备视图
+
+![房间设备视图](screenshots/room.png)
+
+### 添加设备
+
+![添加设备](screenshots/add.png)
+
+### 系统设置（设备类型 / 数据备份）
+
+![系统设置](screenshots/settings.png)
+
+### 个人中心
+
+![个人中心](screenshots/profile.png)
+
 ## 🛠️ 技术栈
 
 - **框架**: Express 4.x
