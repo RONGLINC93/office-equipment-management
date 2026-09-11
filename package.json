@@ -1,6 +1,6 @@
 {
   "name": "ems",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "办公设备管理系统",
   "main": "server.js",
   "scripts": {

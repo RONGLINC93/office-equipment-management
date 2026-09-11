@@ -34,6 +34,10 @@ copy /y "%PROJ%users.json" "%SERVER%\users.json" >nul
 if errorlevel 1 goto fail
 xcopy "%PROJ%public" "%SERVER%\public" /e /i /y /q >nul
 if errorlevel 1 goto fail
+rem --- runtime deps: express / cors / multer / adm-zip / node-cron ---
+if not exist "%PROJ%node_modules\express" goto nodeps
+xcopy "%PROJ%node_modules" "%SERVER%\node_modules" /e /i /y /q >nul
+if errorlevel 1 goto fail
 
 echo [2/5] Sync manifest version from package.json...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%FNOS%\sync-version.ps1" -From "%PROJ%package.json" -Manifest "%PKG%\manifest"
@@ -100,6 +104,16 @@ echo Download the Windows x86 build from
 echo   https://developer.fnnas.com/docs/cli/fnpack/
 echo The downloaded file has no extension - rename it to fnpack.exe and put it in:
 echo   %FNOS%
+echo.
+pause
+exit /b 1
+
+::nodeps
+echo.
+echo node_modules not found (or express is missing).
+echo Install the dependencies first:
+echo   cd /d "%PROJ%"
+echo   npm install
 echo.
 pause
 exit /b 1

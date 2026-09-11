@@ -1,5 +1,5 @@
 appname               = ems
-version               = 1.0.0
+version               = 1.0.1
 display_name          = 办公设备管理系统
 desc                  = 纯 Node.js 办公设备管理系统，覆盖设备台账、设备分类、房间视图、图片上传、数据备份恢复与多用户权限，数据以 JSON 本地持久化，开箱即用。
 platform              = all
