@@ -1,0 +1,9 @@
+# 构建时由 build-fpk / 打包fpk.bat 从项目根目录复制进来，不入库
+ems/app/server/
+
+# 打包产物
+ems/*.fpk
+
+# 本地下载的打包工具
+fnpack
+fnpack.exe

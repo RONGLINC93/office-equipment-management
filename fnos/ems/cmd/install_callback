@@ -1,0 +1,33 @@
+#!/bin/bash
+# 安装后：创建持久化数据目录，把程序目录下的数据文件 / 目录软链过去
+LOG_FILE="${TRIM_PKGVAR:-/tmp}/install.log"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] install_callback ${TRIM_APPNAME:-unknown} ${TRIM_APPVER:-unknown}" >> "${LOG_FILE}" 2>/dev/null
+
+APP_DIR="${TRIM_APPDEST}/server"
+DATA_DIR="${TRIM_PKGVAR}/data"
+mkdir -p "${DATA_DIR}"
+
+# 索引文件：若持久化目录还没有，则用随包数据作为初始值
+for f in devices.json device-types.json users.json; do
+  LINK="${APP_DIR}/${f}"
+  if [ ! -e "${DATA_DIR}/${f}" ] && [ -f "${LINK}" ] && [ ! -L "${LINK}" ]; then
+    cp -f "${LINK}" "${DATA_DIR}/${f}" 2>/dev/null
+  fi
+  if [ ! -L "${LINK}" ]; then
+    [ -e "${LINK}" ] && rm -f "${LINK}"
+    ln -s "${DATA_DIR}/${f}" "${LINK}" 2>/dev/null
+  fi
+done
+
+# 数据目录
+for d in backup uploads; do
+  LINK="${APP_DIR}/${d}"
+  mkdir -p "${DATA_DIR}/${d}"
+  if [ ! -L "${LINK}" ]; then
+    [ -d "${LINK}" ] && rm -rf "${LINK}"
+    ln -s "${DATA_DIR}/${d}" "${LINK}" 2>/dev/null
+  fi
+done
+
+chown -R "${TRIM_USERNAME:-}:${TRIM_GROUPNAME:-}" "${TRIM_PKGVAR}" 2>/dev/null
+exit 0

@@ -3,3 +3,6 @@
 *.log
 backup/
 uploads/
+
+# fpk 打包产物（由 打包fpk.bat / fnos/build-fpk.sh 生成）
+fpk/

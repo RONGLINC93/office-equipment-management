@@ -1,0 +1,16 @@
+appname               = ems
+version               = 1.0.0
+display_name          = 办公设备管理系统
+desc                  = 纯 Node.js 办公设备管理系统，覆盖设备台账、设备分类、房间视图、图片上传、数据备份恢复与多用户权限，数据以 JSON 本地持久化，开箱即用。
+platform              = all
+source                = thirdparty
+maintainer            = RONGLINC93
+maintainer_url        = https://github.com/RONGLINC93/office-equipment-management
+distributor           = RONGLINC93
+distributor_url       = https://github.com/RONGLINC93/office-equipment-management
+os_min_version        = 1.1.8
+desktop_uidir         = ui
+desktop_applaunchname = ems.main
+service_port          = 9525
+install_dep_apps      = nodejs_v20
+ctl_stop              = true

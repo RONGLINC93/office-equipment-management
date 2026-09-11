@@ -1,0 +1,29 @@
+#!/bin/bash
+# 升级后：程序目录被重新解压，重新建立数据软链，数据本身保留
+LOG_FILE="${TRIM_PKGVAR:-/tmp}/install.log"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] upgrade_callback ${TRIM_OLD_APPVER:-unknown} -> ${TRIM_APPVER:-unknown}" >> "${LOG_FILE}" 2>/dev/null
+
+APP_DIR="${TRIM_APPDEST}/server"
+DATA_DIR="${TRIM_PKGVAR}/data"
+mkdir -p "${DATA_DIR}"
+
+for f in devices.json device-types.json users.json; do
+  LINK="${APP_DIR}/${f}"
+  if [ ! -e "${DATA_DIR}/${f}" ] && [ -f "${LINK}" ] && [ ! -L "${LINK}" ]; then
+    cp -f "${LINK}" "${DATA_DIR}/${f}" 2>/dev/null
+  fi
+  if [ ! -L "${LINK}" ]; then
+    [ -e "${LINK}" ] && rm -f "${LINK}"
+    ln -s "${DATA_DIR}/${f}" "${LINK}" 2>/dev/null
+  fi
+done
+
+for d in backup uploads; do
+  LINK="${APP_DIR}/${d}"
+  mkdir -p "${DATA_DIR}/${d}"
+  if [ ! -L "${LINK}" ]; then
+    [ -d "${LINK}" ] && rm -rf "${LINK}"
+    ln -s "${DATA_DIR}/${d}" "${LINK}" 2>/dev/null
+  fi
+done
+exit 0

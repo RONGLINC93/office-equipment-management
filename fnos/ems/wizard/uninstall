@@ -1,0 +1,30 @@
+[
+  {
+    "stepTitle": "卸载办公设备管理系统",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "卸载会移除程序文件。设备台账、设备分类、用户与上传图片等数据存放在应用数据目录中，请选择处理方式："
+      },
+      {
+        "type": "radio",
+        "field": "wizard_data_action",
+        "label": "数据处理",
+        "initValue": "keep",
+        "options": [
+          {
+            "label": "保留数据（推荐）—— 重新安装后可直接继续使用",
+            "value": "keep"
+          },
+          {
+            "label": "删除全部数据 —— 设备、分类、用户与图片一并清除，不可恢复",
+            "value": "delete"
+          }
+        ],
+        "rules": [
+          { "required": true, "message": "请选择数据处理方式" }
+        ]
+      }
+    ]
+  }
+]
