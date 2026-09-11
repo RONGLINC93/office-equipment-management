@@ -20,12 +20,18 @@ cp "${PROJ}/server.js" "${PROJ}/package.json" "${SERVER}/"
 cp "${PROJ}/devices.json" "${PROJ}/device-types.json" "${PROJ}/users.json" "${SERVER}/"
 cp -r "${PROJ}/public" "${SERVER}/public"
 
-# 运行时依赖（express / cors / multer / adm-zip / node-cron）
-if [ ! -d "${PROJ}/node_modules/express" ]; then
-  echo "缺少依赖：${PROJ}/node_modules/express 不存在，请先在项目根目录执行 npm install" >&2
+# 运行时依赖（express / cors / multer / adm-zip / node-cron）—— 全自动处理
+#   优先复制项目根目录的 node_modules；缺失则直接在打包目录安装生产依赖。
+if [ -d "${PROJ}/node_modules/express" ]; then
+  cp -r "${PROJ}/node_modules" "${SERVER}/node_modules"
+elif command -v npm >/dev/null 2>&1; then
+  echo "    未找到 node_modules，使用 npm 安装生产依赖 ..."
+  ( cd "${SERVER}" && npm install --omit=dev --no-audit --no-fund --loglevel=error )
+fi
+if [ ! -d "${SERVER}/node_modules/express" ]; then
+  echo "依赖准备失败：请先在 ${PROJ} 执行 npm install，或确保能在 ${SERVER} 中联网执行 npm install" >&2
   exit 1
 fi
-cp -r "${PROJ}/node_modules" "${SERVER}/node_modules"
 
 echo "[2/5] 同步 manifest 版本号（唯一来源 package.json） ..."
 PKG_VERSION="$(awk -F'"' '/"version"/ { print $4; exit }' "${PROJ}/package.json")"

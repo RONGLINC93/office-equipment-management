@@ -34,10 +34,23 @@ copy /y "%PROJ%users.json" "%SERVER%\users.json" >nul
 if errorlevel 1 goto fail
 xcopy "%PROJ%public" "%SERVER%\public" /e /i /y /q >nul
 if errorlevel 1 goto fail
-rem --- runtime deps: express / cors / multer / adm-zip / node-cron ---
-if not exist "%PROJ%node_modules\express" goto nodeps
+rem --- runtime deps (express/cors/multer/adm-zip/node-cron): fully automatic ---
+rem     Prefer the local node_modules (fast, offline). If it is missing, install
+rem     the production deps straight into the package dir, so packaging never
+rem     depends on the developer having run "npm install" beforehand.
+if exist "%PROJ%node_modules\express" goto copydeps
+where npm >nul 2>nul
+if errorlevel 1 goto nodeps
+echo     node_modules missing - installing production deps with npm ...
+pushd "%SERVER%"
+call npm install --omit=dev --no-audit --no-fund --loglevel=error
+popd
+if not exist "%SERVER%\node_modules\express" goto nodeps
+goto depsok
+:copydeps
 xcopy "%PROJ%node_modules" "%SERVER%\node_modules" /e /i /y /q >nul
 if errorlevel 1 goto fail
+:depsok
 
 echo [2/5] Sync manifest version from package.json...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%FNOS%\sync-version.ps1" -From "%PROJ%package.json" -Manifest "%PKG%\manifest"
@@ -110,10 +123,11 @@ exit /b 1
 
 ::nodeps
 echo.
-echo node_modules not found (or express is missing).
-echo Install the dependencies first:
-echo   cd /d "%PROJ%"
-echo   npm install
+echo Failed to prepare the runtime dependencies.
+echo Either "%PROJ%node_modules" is incomplete, or npm is not available.
+echo Fix it once by doing ONE of these:
+echo   1. cd /d "%PROJ%" ^&^& npm install
+echo   2. drop a complete node_modules folder into "%PROJ%"
 echo.
 pause
 exit /b 1
