@@ -3,7 +3,7 @@
     "ems.main": {
       "title": "办公设备管理系统",
       "icon": "images/icon_{0}.png",
-      "type": "iframe",
+      "type": "url",
       "protocol": "http",
       "port": "9525",
       "url": "/",
