@@ -10,10 +10,11 @@ const EXCLUDE_DIRS = new Set([
 ]);
 const EXCLUDE_FILES = new Set([
   '.env', '.gitignore', '.DS_Store', 'Thumbs.db',
-  'release.js', 'push.js', 'pull.js', 'package.js', 'build-fpk.sh', '办公设备管理系统.url',
+  'release.js', 'push.js', 'pull.js', 'package.js', 'build-fpk.sh',
+  '打包.bat', '打包fpk.bat', '发布.bat', '拉取.bat', '推送.bat',
   'version.json', // 由下方统一写入，避免重复条目
 ]);
-const EXCLUDE_EXT = new Set(['.zip', '.log', '.bat']);
+const EXCLUDE_EXT = new Set(['.zip', '.log']);
 
 function createZipPackage(outputPath) {
   const rootDir = __dirname;

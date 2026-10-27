@@ -109,10 +109,11 @@ function writeVersion(v) {
 const EXCLUDE_DIRS = new Set(['.git', 'fnos', 'releases', 'fpk', 'backup', 'uploads', 'screenshots', '.codebuddy', '.idea', '.vscode']);
 const EXCLUDE_FILES = new Set([
   '.env', '.gitignore', '.DS_Store', 'Thumbs.db',
-  // 构建/发布工具，不属于可部署应用
-  'release.js', 'push.js', 'pull.js', 'package.js', 'build-fpk.sh', '办公设备管理系统.url',
+  // 构建/发布脚本，不属于可部署应用（运行脚本 运行.bat 与快捷方式 办公设备管理系统.url 保留）
+  'release.js', 'push.js', 'pull.js', 'package.js', 'build-fpk.sh',
+  '打包.bat', '打包fpk.bat', '发布.bat', '拉取.bat', '推送.bat',
 ]);
-const EXCLUDE_EXT = new Set(['.zip', '.log', '.bat']);
+const EXCLUDE_EXT = new Set(['.zip', '.log']);
 
 function buildReleaseZip(version) {
   const zip = new AdmZip();
