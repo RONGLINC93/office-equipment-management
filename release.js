@@ -131,7 +131,9 @@ function buildReleaseZip(version) {
 
   const outDir = path.join(ROOT, 'releases');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
-  const outName = `办公设备管理系统-v${version}.zip`;
+  // 注意：GitHub Release 资源名不支持非 ASCII（中文会被剥离），故用 ASCII 命名，
+  // 与 fpk 的 ems-<版本>.fpk 保持一致
+  const outName = `ems-${version}.zip`;
   const outPath = path.join(outDir, outName);
   zip.writeZip(outPath);
   console.log('打包完成:', outName, '(' + (fs.statSync(outPath).size / 1024 / 1024).toFixed(2) + ' MB)');
@@ -300,7 +302,7 @@ async function createRelease(version, assets) {
   console.log(`在 GitHub 创建 Release ${tag} ...`);
   const rel = await githubRequest('POST', `/repos/${OWNER}/${REPO}/releases`, {
     tag_name: tag,
-    name: `办公设备管理系统 v${version}`,
+    name: `v${version}`,
     body: `发布版本 v${version}\n\n构建时间：${new Date().toLocaleString('zh-CN')}`,
     draft: false,
     prerelease: false,
