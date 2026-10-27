@@ -103,8 +103,11 @@ function writeVersion(v) {
 }
 
 // ---------- 打包 release zip ----------
-const EXCLUDE_DIRS = new Set(['.git', 'node_modules', 'releases', 'fpk', 'backup', 'uploads', 'screenshots', '.codebuddy', '.idea', '.vscode']);
-const EXCLUDE_FILES = new Set(['.env', '.DS_Store', 'Thumbs.db']);
+// 注意：node_modules 不在此排除列表内——发布 zip 需要自带依赖，解压即可 node server.js 运行，
+// 与 package.js（打包.bat）行为一致；fpk 同样自带依赖。
+// fnos/ 是 fpk 打包工具链（fnpack.exe、脚本等），不属于可部署应用，排除。
+const EXCLUDE_DIRS = new Set(['.git', 'fnos', 'releases', 'fpk', 'backup', 'uploads', 'screenshots', '.codebuddy', '.idea', '.vscode']);
+const EXCLUDE_FILES = new Set(['.env', '.gitignore', '.DS_Store', 'Thumbs.db']);
 const EXCLUDE_EXT = new Set(['.zip', '.log']);
 
 function buildReleaseZip(version) {
