@@ -93,6 +93,13 @@ function writeVersion(v) {
     pj.version = v;
     fs.writeFileSync(pp, JSON.stringify(pj, null, 2) + '\n');
   }
+  // 同步前端「关于系统」页面显示的版本号（public/index.html）
+  const htmlPath = path.join(ROOT, 'public', 'index.html');
+  if (fs.existsSync(htmlPath)) {
+    const html = fs.readFileSync(htmlPath, 'utf-8');
+    const updated = html.replace(/(<p class="about-version">\s*版本\s*)[\d.]+(<\/p>)/, `$1${v}$2`);
+    if (updated !== html) fs.writeFileSync(htmlPath, updated);
+  }
 }
 
 // ---------- 打包 release zip ----------
