@@ -107,8 +107,12 @@ function writeVersion(v) {
 // 与 package.js（打包.bat）行为一致；fpk 同样自带依赖。
 // fnos/ 是 fpk 打包工具链（fnpack.exe、脚本等），不属于可部署应用，排除。
 const EXCLUDE_DIRS = new Set(['.git', 'fnos', 'releases', 'fpk', 'backup', 'uploads', 'screenshots', '.codebuddy', '.idea', '.vscode']);
-const EXCLUDE_FILES = new Set(['.env', '.gitignore', '.DS_Store', 'Thumbs.db']);
-const EXCLUDE_EXT = new Set(['.zip', '.log']);
+const EXCLUDE_FILES = new Set([
+  '.env', '.gitignore', '.DS_Store', 'Thumbs.db',
+  // 构建/发布工具，不属于可部署应用
+  'release.js', 'push.js', 'pull.js', 'package.js', 'build-fpk.sh', '办公设备管理系统.url',
+]);
+const EXCLUDE_EXT = new Set(['.zip', '.log', '.bat']);
 
 function buildReleaseZip(version) {
   const zip = new AdmZip();
@@ -125,6 +129,7 @@ function buildReleaseZip(version) {
         walk(fp);
       } else {
         if (EXCLUDE_FILES.has(name)) { console.log('跳过文件:', rel); continue; }
+        if (name.startsWith('_')) { console.log('跳过文件:', rel); continue; } // 跳过临时/辅助脚本（如 _rebuild_zip.js）
         if (EXCLUDE_EXT.has(path.extname(name).toLowerCase())) { console.log('跳过文件:', rel); continue; }
         zip.addFile(rel, fs.readFileSync(fp), '', 0x0008);
       }
