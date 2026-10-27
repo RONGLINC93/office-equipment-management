@@ -4,5 +4,8 @@
 backup/
 uploads/
 
+# 发布产物（由 发布.bat / release.js 生成）
+releases/
+
 # fpk 打包产物（由 打包fpk.bat / fnos/build-fpk.sh 生成）
 fpk/
